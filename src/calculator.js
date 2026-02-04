@@ -8,6 +8,9 @@
  * - Subtraction (-): Subtract numbers from a starting value
  * - Multiplication (*): Multiply two or more numbers
  * - Division (/): Divide numbers (includes division by zero error handling)
+ * - Modulo (%): Returns the remainder of a divided by b
+ * - Power (^): Returns base raised to the exponent
+ * - Square Root (√): Returns the square root of n (with error handling for negative numbers)
  */
 
 const readline = require('readline');
@@ -46,6 +49,33 @@ const operations = {
       }
       return index === 0 ? num : quotient / num;
     });
+  },
+  
+  /**
+   * Modulo: Returns the remainder of a divided by b
+   */
+  modulo: (a, b) => {
+    if (b === 0) {
+      throw new Error('Modulo by zero is not allowed');
+    }
+    return a % b;
+  },
+  
+  /**
+   * Power: Returns base raised to the exponent
+   */
+  power: (base, exponent) => {
+    return Math.pow(base, exponent);
+  },
+  
+  /**
+   * Square Root: Returns the square root of n (with error handling for negative numbers)
+   */
+  squareRoot: (n) => {
+    if (n < 0) {
+      throw new Error('Square root of negative numbers is not supported');
+    }
+    return Math.sqrt(n);
   }
 };
 
@@ -70,13 +100,16 @@ function displayMenu() {
   console.log('  - : Subtraction');
   console.log('  * : Multiplication');
   console.log('  / : Division');
+  console.log('  % : Modulo');
+  console.log('  ^ : Power');
+  console.log('  √ : Square Root');
   console.log('  c : Clear/New calculation');
   console.log('  q : Quit');
   console.log('=============================\n');
 }
 
 function promptUser() {
-  rl.question('Enter operation (+, -, *, /) or q to quit: ', (operation) => {
+  rl.question('Enter operation (+, -, *, /, %, ^, √) or q to quit: ', (operation) => {
     operation = operation.trim().toLowerCase();
     
     if (operation === 'q') {
@@ -95,7 +128,11 @@ function promptUser() {
       '+': 'add',
       '-': 'subtract',
       '*': 'multiply',
-      '/': 'divide'
+      '/': 'divide',
+      '%': 'modulo',
+      '^': 'power',
+      '√': 'squareRoot',
+      'sqrt': 'squareRoot'
     };
     
     if (!opMap[operation]) {
@@ -113,14 +150,28 @@ function promptUser() {
         return;
       }
       
-      if (numbers.length < 2) {
+      const selectedOp = opMap[operation];
+      
+      if (selectedOp === 'squareRoot' && numbers.length !== 1) {
+        console.log('Square root requires exactly one number.');
+        promptUser();
+        return;
+      }
+      
+      if (['modulo', 'power'].includes(selectedOp) && numbers.length !== 2) {
+        console.log(`${selectedOp.charAt(0).toUpperCase() + selectedOp.slice(1)} requires exactly two numbers.`);
+        promptUser();
+        return;
+      }
+      
+      if (!['modulo', 'power', 'squareRoot'].includes(selectedOp) && numbers.length < 2) {
         console.log('Please enter at least two numbers.');
         promptUser();
         return;
       }
       
       try {
-        const result = calculate(opMap[operation], numbers);
+        const result = calculate(selectedOp, numbers);
         console.log(`\nResult: ${result}\n`);
       } catch (error) {
         console.log(`\nError: ${error.message}\n`);
